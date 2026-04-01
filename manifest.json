@@ -13,7 +13,8 @@
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
   },
   "action": {
     "default_popup": "popup/popup.html",
@@ -32,6 +33,12 @@
         "mac": "Command+Shift+Y"
       },
       "description": "Audio Bridge'i Aç/Kapat"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "audio-bridge@poyraz.com",
+      "strict_min_version": "109.0"
     }
   }
 }
