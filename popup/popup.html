@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Bridge</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Audio Bridge</h2>
+        <p>Sekmeler arası ses senkronizasyonu</p>
+        
+        <div class="bridge-control">
+            <label class="switch">
+                <input type="checkbox" id="bridgeToggle">
+                <span class="slider round"></span>
+            </label>
+            <span id="bridgeStatus">Kapalı</span>
+        </div>
+
+        <div class="tab-selection">
+            <div class="tab-group">
+                <label for="sourceTab">Kaynak Sekme (Eğitim vb.):</label>
+                <select id="sourceTab">
+                    <option value="">Seçiniz...</option>
+                </select>
+            </div>
+            
+            <div class="tab-group">
+                <label for="targetTab">Hedef Sekme (Müzik vb.):</label>
+                <select id="targetTab">
+                    <option value="">Seçiniz...</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

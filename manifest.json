@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Audio Bridge: Seamless Tab Sync",
+  "version": "1.0.0",
+  "description": "Farklı tarayıcı sekmeleri arasındaki ses oynatma durumlarını birbirine bağlar.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Audio Bridge"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
