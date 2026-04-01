@@ -15,6 +15,15 @@ body {
 
 .header {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.header-logo {
+    width: 42px;
+    height: auto;
 }
 
 h2 {
