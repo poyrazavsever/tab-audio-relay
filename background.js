@@ -1,21 +1,23 @@
 // Background Service Worker for Audio Bridge
 let state = {
     bridgeActive: false,
-    sourceTabId: null,
-    targetTabId: null,
+    tabA: null,
+    tabB: null,
     delayMs: 500
 };
 
 let playTimeout = null;
+// Sonsuz döngüyü engellemek için, kullanıcının veya sistemin "çalmasına" niyetlendiği sekmeyi tutarız:
+let intendedPlayingTabId = null;
 
 // Yükleme fonksiyonu
 async function loadState() {
-    const data = await chrome.storage.local.get(['bridgeActive', 'sourceTabId', 'targetTabId', 'delayMs']);
+    const data = await chrome.storage.local.get(['bridgeActive', 'tabA', 'tabB', 'delayMs']);
     state.bridgeActive = data.bridgeActive || false;
-    state.sourceTabId = data.sourceTabId || null;
-    state.targetTabId = data.targetTabId || null;
+    state.tabA = data.tabA || null;
+    state.tabB = data.tabB || null;
     state.delayMs = data.delayMs !== undefined ? data.delayMs : 500;
-    console.log("Audio Bridge State updated:", state);
+    console.log("Audio Bridge State updated (Symmetric):", state);
 }
 
 // Initial load
@@ -39,34 +41,51 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 // Sekme durum değişikliklerini dinle
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (!state.bridgeActive || !state.sourceTabId || !state.targetTabId) return;
+    if (!state.bridgeActive || !state.tabA || !state.tabB) return;
 
-    if (tabId === state.sourceTabId && changeInfo.audible !== undefined) {
-        console.log(`Source tab [${tabId}] audible changed to: ${changeInfo.audible}`);
-        
-        if (playTimeout) {
-            clearTimeout(playTimeout);
-            playTimeout = null;
-        }
+    if (changeInfo.audible !== undefined) {
+        // Dinlenen iki sekmeden biri mi?
+        if (tabId === state.tabA || tabId === state.tabB) {
+            console.log(`Tab [${tabId}] audible changed to: ${changeInfo.audible}`);
+            const otherTabId = (tabId === state.tabA) ? state.tabB : state.tabA;
 
-        if (changeInfo.audible === true) {
-            console.log("Source playing. Pausing target tab.");
-            controlMedia(state.targetTabId, 'PAUSE_MEDIA');
-        } else if (changeInfo.audible === false) {
-            console.log("Source paused. Playing target tab with delay:", state.delayMs);
-            playTimeout = setTimeout(() => {
-                controlMedia(state.targetTabId, 'PLAY_MEDIA');
-            }, state.delayMs);
+            if (changeInfo.audible === true) {
+                // Bu sekme çalmaya başladı!
+                intendedPlayingTabId = tabId;
+                
+                if (playTimeout) {
+                    clearTimeout(playTimeout);
+                    playTimeout = null;
+                }
+                
+                // Diğer sekmeyi acilen sustur:
+                console.log(`Pausing the other tab [${otherTabId}]`);
+                controlMedia(otherTabId, 'PAUSE_MEDIA');
+
+            } else if (changeInfo.audible === false) {
+                // Bu sekme sustu!
+                // Eğer susan sekme 'bizim veya kullanıcının bilerek çaldığı' sekme ise (kullanıcı bunu manuel durdurmuş demektir).
+                // O yüzden diğerini çaldırmaya başlamalıyız.
+                if (intendedPlayingTabId === tabId || intendedPlayingTabId === null) {
+                    intendedPlayingTabId = otherTabId; // Artık diğerini çaldıracağız
+                    
+                    console.log(`Tab paused manually. Playing the other tab [${otherTabId}] after ${state.delayMs}ms`);
+                    playTimeout = setTimeout(() => {
+                        controlMedia(otherTabId, 'PLAY_MEDIA');
+                    }, state.delayMs);
+                }
+                // Eğer susan sekme 'intendedPlayingTabId' değilse, bu sekme zaten BİZ 'PAUSE_MEDIA'
+                // gönderdiğimiz için susmuştur. Bu durumda hiçbir şey yapmayız, sonsuz döngü kırılır.
+            }
         }
     }
 });
 
+// Sekme kapatılırsa temizlik yap
 chrome.tabs.onRemoved.addListener(async (tabId) => {
-    if (tabId === state.sourceTabId) {
-        await chrome.storage.local.set({ sourceTabId: null, bridgeActive: false });
-        loadState();
-    } else if (tabId === state.targetTabId) {
-        await chrome.storage.local.set({ targetTabId: null, bridgeActive: false });
+    if (tabId === state.tabA || tabId === state.tabB) {
+        if (tabId === state.tabA) await chrome.storage.local.set({ tabA: null, bridgeActive: false });
+        if (tabId === state.tabB) await chrome.storage.local.set({ tabB: null, bridgeActive: false });
         loadState();
     }
 });
@@ -74,7 +93,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 function controlMedia(tabId, action) {
     chrome.tabs.sendMessage(tabId, { action: action }, (response) => {
         if (chrome.runtime.lastError) {
-            console.log("Injecting fallback script...");
+            console.log(`Injecting fallback script into tab ${tabId}...`);
             chrome.scripting.executeScript({
                 target: { tabId: tabId },
                 files: ['content.js']
@@ -82,7 +101,7 @@ function controlMedia(tabId, action) {
                 chrome.tabs.sendMessage(tabId, { action: action });
             }).catch(err => console.error("Script injection failed:", err));
         } else {
-            console.log(`Command ${action} sent successfully.`);
+            console.log(`Command ${action} sent successfully to tab ${tabId}.`);
         }
     });
 }

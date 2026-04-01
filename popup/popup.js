@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const bridgeToggle = document.getElementById('bridgeToggle');
     const bridgeStatus = document.getElementById('bridgeStatus');
-    const sourceTabSelect = document.getElementById('sourceTab');
-    const targetTabSelect = document.getElementById('targetTab');
+    const tabASelect = document.getElementById('tabASelect');
+    const tabBSelect = document.getElementById('tabBSelect');
     const delayInput = document.getElementById('delayInput');
 
-    // Restore state from storage
-    const state = await chrome.storage.local.get(['bridgeActive', 'sourceTabId', 'targetTabId', 'delayMs']);
+    // Restore state from storage (yeni tabA ve tabB anahtarlarıyla)
+    const state = await chrome.storage.local.get(['bridgeActive', 'tabA', 'tabB', 'delayMs']);
     
     bridgeToggle.checked = state.bridgeActive || false;
     updateStatusText(bridgeToggle.checked);
@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Populate tabs
     const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
     
-    populateSelect(sourceTabSelect, tabs, state.sourceTabId);
-    populateSelect(targetTabSelect, tabs, state.targetTabId);
+    populateSelect(tabASelect, tabs, state.tabA);
+    populateSelect(tabBSelect, tabs, state.tabB);
 
     // Event Listeners
     bridgeToggle.addEventListener('change', async (e) => {
@@ -26,15 +26,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         notifyBackground();
     });
 
-    sourceTabSelect.addEventListener('change', async (e) => {
+    tabASelect.addEventListener('change', async (e) => {
         const value = e.target.value ? parseInt(e.target.value, 10) : null;
-        await chrome.storage.local.set({ sourceTabId: value });
+        await chrome.storage.local.set({ tabA: value });
         notifyBackground();
     });
 
-    targetTabSelect.addEventListener('change', async (e) => {
+    tabBSelect.addEventListener('change', async (e) => {
         const value = e.target.value ? parseInt(e.target.value, 10) : null;
-        await chrome.storage.local.set({ targetTabId: value });
+        await chrome.storage.local.set({ tabB: value });
         notifyBackground();
     });
 
