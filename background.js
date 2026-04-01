@@ -2,19 +2,23 @@
 let state = {
     bridgeActive: false,
     sourceTabId: null,
-    targetTabId: null
+    targetTabId: null,
+    delayMs: 500
 };
+
+let playTimeout = null;
 
 // Yükleme fonksiyonu
 async function loadState() {
-    const data = await chrome.storage.local.get(['bridgeActive', 'sourceTabId', 'targetTabId']);
+    const data = await chrome.storage.local.get(['bridgeActive', 'sourceTabId', 'targetTabId', 'delayMs']);
     state.bridgeActive = data.bridgeActive || false;
     state.sourceTabId = data.sourceTabId || null;
     state.targetTabId = data.targetTabId || null;
+    state.delayMs = data.delayMs !== undefined ? data.delayMs : 500;
     console.log("Audio Bridge State updated:", state);
 }
 
-// Extension başlatıldığında storage'dan verileri al
+// Initial load
 loadState();
 
 // Popup'tan gelen bildirimleri dinle
@@ -24,30 +28,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
-// Sekme durum değişikliklerini dinle (Audible eventi izleme)
+// Kısayol (Shortcut) dinleyici
+chrome.commands.onCommand.addListener(async (command) => {
+    if (command === 'toggle_bridge') {
+        state.bridgeActive = !state.bridgeActive;
+        await chrome.storage.local.set({ bridgeActive: state.bridgeActive });
+        console.log(`Bridge toggled via shortcut. Active: ${state.bridgeActive}`);
+    }
+});
+
+// Sekme durum değişikliklerini dinle
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (!state.bridgeActive || !state.sourceTabId || !state.targetTabId) return;
 
-    // Sadece kaynak sekmedeki "audible" (ses çıkarma) özelliğinin değişimini izle
     if (tabId === state.sourceTabId && changeInfo.audible !== undefined) {
         console.log(`Source tab [${tabId}] audible changed to: ${changeInfo.audible}`);
         
+        if (playTimeout) {
+            clearTimeout(playTimeout);
+            playTimeout = null;
+        }
+
         if (changeInfo.audible === true) {
-            // Kaynak sekme ses çıkarmaya başladı -> Hedef sekmeyi durdur
-            console.log("Source started playing audio. Pausing target tab.");
+            console.log("Source playing. Pausing target tab.");
             controlMedia(state.targetTabId, 'PAUSE_MEDIA');
         } else if (changeInfo.audible === false) {
-            // Kaynak sekme sustu -> Hedef sekmeyi oynat
-            console.log("Source stopped playing audio. Playing target tab.");
-            // Kücük bir gecikme ekleyerek daha akıcı geçiş sağlayabiliriz (Faz 3 Delay özelliği altyapısı)
-            setTimeout(() => {
+            console.log("Source paused. Playing target tab with delay:", state.delayMs);
+            playTimeout = setTimeout(() => {
                 controlMedia(state.targetTabId, 'PLAY_MEDIA');
-            }, 500); 
+            }, state.delayMs);
         }
     }
 });
 
-// Kapalı sekmeleri izle, eğer izlenen sekmelerden biri kapanırsa storage'ı temizle
 chrome.tabs.onRemoved.addListener(async (tabId) => {
     if (tabId === state.sourceTabId) {
         await chrome.storage.local.set({ sourceTabId: null, bridgeActive: false });
@@ -58,12 +71,10 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     }
 });
 
-// İçerik betiğine (content script) medya durdur/oynat komutu gönder
 function controlMedia(tabId, action) {
     chrome.tabs.sendMessage(tabId, { action: action }, (response) => {
         if (chrome.runtime.lastError) {
-            // Eğer sayfa yeni yenilendiyse veya content script henüz yoksa inject edip tekrar deneyelim
-            console.log("Content script not active, injecting fallback script...");
+            console.log("Injecting fallback script...");
             chrome.scripting.executeScript({
                 target: { tabId: tabId },
                 files: ['content.js']
@@ -71,7 +82,7 @@ function controlMedia(tabId, action) {
                 chrome.tabs.sendMessage(tabId, { action: action });
             }).catch(err => console.error("Script injection failed:", err));
         } else {
-            console.log(`Command ${action} sent successfully to tab ${tabId}.`);
+            console.log(`Command ${action} sent successfully.`);
         }
     });
 }

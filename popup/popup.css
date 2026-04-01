@@ -45,7 +45,7 @@ p {
     transition: color 0.3s;
 }
 
-.tab-selection {
+.tab-selection, .settings {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -63,7 +63,7 @@ p {
     color: #4b5563;
 }
 
-select {
+select, input[type="number"] {
     padding: 8px 12px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
@@ -73,9 +73,15 @@ select {
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
     cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-select:focus {
+input[type="number"] {
+    cursor: text;
+}
+
+select:focus, input[type="number"]:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }

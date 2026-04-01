@@ -1,5 +1,5 @@
 // Content Script for Audio Bridge
-// Medya oynatma komutlarını çalıştırır
+let isBridgePaused = false;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'PAUSE_MEDIA') {
@@ -17,22 +17,47 @@ function getMediaElements() {
 }
 
 function pauseMedia() {
+    // 1. Spotify Özel Kontrolü (SPA Butonu)
+    // Spotify web player play/pause butonunu arıyoruz
+    const spotifyBtn = document.querySelector('[data-testid="control-button-playpause"]');
+    if (spotifyBtn) {
+        const ariaLabel = spotifyBtn.getAttribute('aria-label');
+        if (ariaLabel === 'Pause' || ariaLabel === 'Duraklat') {
+            spotifyBtn.click();
+            isBridgePaused = true;
+            return;
+        }
+    }
+
+    // 2. Genel Media Element Kontrolü (YouTube vb.)
     const medias = getMediaElements();
     medias.forEach(media => {
         if (!media.paused) {
             media.pause();
-            // Bu elementin bizim tarafımızdan durdurulduğunu işaretleyelim
-            // Böylece playMedia çağrıldığında sadece onu devam ettiririz.
             media.dataset.bridgePaused = 'true';
+            isBridgePaused = true;
         }
     });
 }
 
 function playMedia() {
+    if (!isBridgePaused) return;
+
+    // 1. Spotify Özel Kontrolü
+    const spotifyBtn = document.querySelector('[data-testid="control-button-playpause"]');
+    if (spotifyBtn) {
+        const ariaLabel = spotifyBtn.getAttribute('aria-label');
+        if (ariaLabel === 'Play' || ariaLabel === 'Oynat') {
+            spotifyBtn.click();
+            isBridgePaused = false;
+            return;
+        }
+    }
+
+    // 2. Genel Media Element Kontrolü
     const medias = getMediaElements();
     let played = false;
     
-    // Önce bizim tarafımızdan durdurulanları oynatmayı dene
     medias.forEach(media => {
         if (media.dataset.bridgePaused === 'true') {
             media.play().catch(e => console.log('Auto-play prevented:', e));
@@ -41,8 +66,9 @@ function playMedia() {
         }
     });
 
-    // Eğer bizim durdurduğumuz yoksa sayfadaki ilk videoyu/sesi oynat (Örn: sayfa yeni açılmışsa)
     if (!played && medias.length > 0) {
         medias[0].play().catch(e => console.log('Auto-play prevented:', e));
     }
+    
+    isBridgePaused = false;
 }

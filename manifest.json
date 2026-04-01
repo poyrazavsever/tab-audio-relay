@@ -24,5 +24,14 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"]
     }
-  ]
+  ],
+  "commands": {
+    "toggle_bridge": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Audio Bridge'i Aç/Kapat"
+    }
+  }
 }
