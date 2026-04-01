@@ -8,27 +8,29 @@
 </head>
 <body>
     <div class="container">
-        <h2>Audio Bridge</h2>
-        <p>Sekmeler arası ses senkronizasyonu</p>
+        <div class="header">
+            <h2>Audio Bridge</h2>
+            <p>Sekmeler arası ses senkronu</p>
+        </div>
         
         <div class="bridge-control">
+            <span id="bridgeStatus">Köprü Kapalı</span>
             <label class="switch">
                 <input type="checkbox" id="bridgeToggle">
-                <span class="slider round"></span>
+                <span class="slider"></span>
             </label>
-            <span id="bridgeStatus">Kapalı</span>
         </div>
 
         <div class="tab-selection">
             <div class="tab-group">
-                <label for="sourceTab">Kaynak Sekme (Eğitim vb.):</label>
+                <label for="sourceTab">Kaynak (Eğitim, Video vs.)</label>
                 <select id="sourceTab">
                     <option value="">Seçiniz...</option>
                 </select>
             </div>
             
             <div class="tab-group">
-                <label for="targetTab">Hedef Sekme (Müzik vb.):</label>
+                <label for="targetTab">Hedef (Müzik, Spotify vs.)</label>
                 <select id="targetTab">
                     <option value="">Seçiniz...</option>
                 </select>
