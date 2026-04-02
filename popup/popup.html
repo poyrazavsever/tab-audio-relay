@@ -1,51 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Audio Bridge</title>
-    <link rel="icon" href="../assets/favicon.ico">
-    <link rel="stylesheet" href="popup.css">
-</head>
-<body>
+    <link rel="icon" href="../assets/favicon.ico" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <img src="../assets/logo.png" alt="Logo" class="header-logo">
-            <h2>Audio Bridge</h2>
-            <p>Sekmeler arası ses senkronu</p>
-        </div>
-        
-        <div class="bridge-control">
-            <span id="bridgeStatus">Köprü Kapalı</span>
-            <label class="switch">
-                <input type="checkbox" id="bridgeToggle">
-                <span class="slider"></span>
-            </label>
+      <div class="header">
+        <img src="../assets/logo.png" alt="Logo" class="header-logo" />
+        <h2 id="titleText">Audio Bridge</h2>
+        <p id="subtitleText">Seamless tab audio sync</p>
+      </div>
+
+      <div class="bridge-control">
+        <span id="bridgeStatus">Bridge Off</span>
+        <label class="switch">
+          <input type="checkbox" id="bridgeToggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="tab-selection">
+        <div class="tab-group">
+          <label id="tabALabel" for="tabASelect"
+            >1st Tab (e.g. Video, Learning)</label
+          >
+          <select id="tabASelect">
+            <option value="">Select...</option>
+          </select>
         </div>
 
-        <div class="tab-selection">
-            <div class="tab-group">
-                <label for="tabASelect">1. Sekme (Örn: Video, Eğitim)</label>
-                <select id="tabASelect">
-                    <option value="">Seçiniz...</option>
-                </select>
-            </div>
-            
-            <div class="tab-group">
-                <label for="tabBSelect">2. Sekme (Örn: Müzik, Spotify)</label>
-                <select id="tabBSelect">
-                    <option value="">Seçiniz...</option>
-                </select>
-            </div>
+        <div class="tab-group">
+          <label id="tabBLabel" for="tabBSelect"
+            >2nd Tab (e.g. Music, Spotify)</label
+          >
+          <select id="tabBSelect">
+            <option value="">Select...</option>
+          </select>
         </div>
+      </div>
 
-        <div class="settings">
-            <div class="tab-group">
-                <label for="delayInput">Geçiş Gecikmesi (ms)</label>
-                <input type="number" id="delayInput" value="500" min="0" max="5000" step="100">
-            </div>
+      <div class="settings">
+        <div class="tab-group">
+          <label id="delayLabel" for="delayInput">Transition Delay (ms)</label>
+          <input
+            type="number"
+            id="delayInput"
+            value="500"
+            min="0"
+            max="5000"
+            step="100"
+          />
         </div>
+      </div>
     </div>
     <script src="popup.js"></script>
-</body>
+  </body>
 </html>
