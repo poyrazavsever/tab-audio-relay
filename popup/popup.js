@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   tabASelect.addEventListener("change", async (e) => {
     const value = e.target.value ? parseInt(e.target.value, 10) : null;
     
-    invalidateTabSelectIfTabIdIsInvalid(value, tabASelect);
+    await validateTabId(value, tabASelect);
     state.tabA = value;
     await chrome.storage.local.set({ tabA: value });
     notifyBackground();
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   tabBSelect.addEventListener("change", async (e) => {
     const value = e.target.value ? parseInt(e.target.value, 10) : null;
     
-    invalidateTabSelectIfTabIdIsInvalid(value, tabBSelect);
+    await validateTabId(value, tabBSelect);
     state.tabB = value;
     await chrome.storage.local.set({ tabB: value });
     notifyBackground();
@@ -216,23 +216,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  async function invalidateTabSelectIfTabIdIsInvalid(tabId, tabSelect) {
-    // Tab ID geçerliyse, kontrol et
-    if (tabId) {
-      try {
-        const tab = await chrome.tabs.get(tabId);
-        if (!tab) {
-          console.warn(`Tab ${tabId} no longer exists`);
-          alert("This tab no longer exists. Please select another one.");
-          tabSelect.value = "";
-          return;
-        }
-      } catch (err) {
-        console.warn(`Cannot access tab ${tabId}:`, err.message);
-        alert("Cannot access this tab. Please select another one.");
+  async function validateTabId(tabId, tabSelect) {
+    if (!tabId) return;
+    
+    try {
+      const tab = await chrome.tabs.get(tabId);
+      if (!tab) {
+        console.warn(`Tab ${tabId} no longer exists`);
+        alert("This tab no longer exists. Please select another one.");
         tabSelect.value = "";
         return;
       }
+    } catch (err) {
+      console.warn(`Cannot access tab ${tabId}:`, err.message);
+      alert("Cannot access this tab. Please select another one.");
+      tabSelect.value = "";
     }
   }
 
