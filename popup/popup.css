@@ -73,7 +73,8 @@ p {
 }
 
 select, input[type="number"] {
-    padding: 8px 12px;
+    height: 36px;
+    padding: 0 12px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 0.85rem;
@@ -84,10 +85,13 @@ select, input[type="number"] {
     cursor: pointer;
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
 }
 
 input[type="number"] {
     cursor: text;
+    padding: 0 12px;
 }
 
 select:focus, input[type="number"]:focus {
@@ -140,4 +144,55 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(18px);
+}
+
+/* Tab Control Layout */
+.tab-control {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tab-control select {
+  flex: 1;
+}
+
+/* Play/Pause Button */
+.play-pause-btn {
+  height: 36px;
+  width: 36px;
+  padding: 0;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f3f4f6;
+  color: #111827;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.play-pause-btn:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.play-pause-btn:active {
+  background-color: #d1d5db;
+}
+
+.play-pause-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.play-pause-btn.playing {
+  background-color: #dbeafe;
+  border-color: #3b82f6;
+  color: #1e40af;
 }

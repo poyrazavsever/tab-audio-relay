@@ -90,18 +90,68 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     }
 });
 
-function controlMedia(tabId, action) {
-    chrome.tabs.sendMessage(tabId, { action: action }, (response) => {
-        if (chrome.runtime.lastError) {
-            console.log(`Injecting fallback script into tab ${tabId}...`);
-            chrome.scripting.executeScript({
-                target: { tabId: tabId },
-                files: ['content.js']
-            }).then(() => {
-                chrome.tabs.sendMessage(tabId, { action: action });
-            }).catch(err => console.error("Script injection failed:", err));
-        } else {
-            console.log(`Command ${action} sent successfully to tab ${tabId}.`);
+async function controlMedia(tabId, action) {
+    try {
+        // Öncelikle tab'ın hala var olup olmadığını kontrol et
+        const tab = await chrome.tabs.get(tabId);
+        if (!tab) {
+            console.warn(`Tab ${tabId} no longer exists. Clearing from storage.`);
+            clearTabIfInvalid(tabId);
+            return;
         }
-    });
+
+        // Chrome internal pages'e mesaj gönderilemez
+        if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('about:'))) {
+            console.warn(`Cannot control tab ${tabId}: internal page`);
+            return;
+        }
+
+        // Mesajı gönder
+        chrome.tabs.sendMessage(tabId, { action: action }, (response) => {
+            if (chrome.runtime.lastError) {
+                // Content script yoksa, enjekte et ve tekrar gönder
+                console.log(`Content script not ready in tab ${tabId}, will inject...`);
+                chrome.scripting.executeScript({
+                    target: { tabId: tabId },
+                    files: ['content.js']
+                }).then(() => {
+                    console.log(`Content script injected to tab ${tabId}`);
+                    // Enjeksiyon başarılı oldu, 200ms sonra mesaj gönder
+                    setTimeout(() => {
+                        chrome.tabs.sendMessage(tabId, { action: action }, (retryResponse) => {
+                            if (chrome.runtime.lastError) {
+                                console.warn(`Could not send ${action} to tab ${tabId} after injection`);
+                                clearTabIfInvalid(tabId);
+                            } else {
+                                console.log(`${action} sent to tab ${tabId} after injection`);
+                            }
+                        });
+                    }, 200);
+                }).catch(err => {
+                    console.warn(`Could not inject content script into tab ${tabId}:`, err.message);
+                    clearTabIfInvalid(tabId);
+                });
+            } else {
+                console.log(`${action} sent successfully to tab ${tabId}`);
+            }
+        });
+    } catch (error) {
+        console.warn(`Tab ${tabId} is no longer available:`, error.message);
+        clearTabIfInvalid(tabId);
+    }
+}
+
+// Eski veya geçersiz tab ID'lerini temizle
+async function clearTabIfInvalid(tabId) {
+    if (tabId === state.tabA) {
+        await chrome.storage.local.set({ tabA: null, bridgeActive: false });
+        state.tabA = null;
+        state.bridgeActive = false;
+    }
+    
+    if (tabId === state.tabB) {
+        await chrome.storage.local.set({ tabB: null, bridgeActive: false });
+        state.tabB = null;
+        state.bridgeActive = false;
+    }
 }
