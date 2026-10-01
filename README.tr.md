@@ -25,6 +25,11 @@ Audio Bridge iki sekme arasında akıllı bir köprü kurar (örneğin bir eğit
 - **Sekme A** sustuğunda (manuel durdurma / ses kesilmesi), **Sekme B** ayarlanan gecikme sonrası tekrar oynatılır.
 - Döngüye girmemek için arka planda durum takibi yapılır.
 
+## Özellikler
+
+- **Araç çubuğu rozeti:** Köprü açıkken eklenti ikonunda yeşil bir `ON` rozeti görünür; kısayolla açıp kapattığında da güncellenir.
+- **Odak geçişi sayacı:** Popup, köprünün bugün senin yerine kaç kez geçiş yaptığını gösterir. Yalnızca medyayı gerçekten duraklatan/başlatan geçişler sayılır ve sayaç her gün sıfırlanır.
+
 ## Mimari Özeti
 
 - **Observer:** Tarayıcı sekme olaylarından ses durumu değişimlerini dinler.
@@ -37,11 +42,11 @@ Audio Bridge iki sekme arasında akıllı bir köprü kurar (örneğin bir eğit
 2. Açılır listelerden **Sekme A** ve **Sekme B** seç.
 3. Gerekirse gecikme süresi (ms) belirle.
 4. Köprüyü **Açık** konumuna getir.
-5. Kısayol: `Ctrl+Shift+Y` (Windows/Linux) veya `Cmd+Shift+Y` (macOS).
+5. Kısayol: `Ctrl+Shift+Y` (Windows/Linux) veya `Cmd+Shift+Y` (macOS). Köprü açıkken araç çubuğu rozetinde `ON` yazar.
 
 ## Dil Desteği
 
-Popup arayüzü şu dilleri destekler:
+Popup arayüzü ve eklentinin mağaza adı/açıklaması (`_locales` ile) şu dilleri destekler:
 
 - Türkçe (`tr`)
 - İngilizce (`en`)

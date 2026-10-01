@@ -25,6 +25,11 @@ Audio Bridge creates a smart bridge between two tabs (for example, a course vide
 - If **Tab A** stops (manual pause / no longer audible), **Tab B** is resumed after a configurable delay.
 - Internal state handling is used to prevent pause/play loops.
 
+## Features
+
+- **Toolbar badge:** A green `ON` badge on the extension icon shows at a glance that the bridge is active, including when you toggle it with the keyboard shortcut.
+- **Focus switches counter:** The popup shows how many times the bridge switched playback for you today. Only switches that actually paused or resumed media are counted, and the counter resets every day.
+
 ## Architecture Highlights
 
 - **Observer:** Tracks tab audible updates using browser tab events.
@@ -37,11 +42,11 @@ Audio Bridge creates a smart bridge between two tabs (for example, a course vide
 2. Pick **Tab A** and **Tab B** from dropdowns.
 3. Set transition delay in milliseconds (optional).
 4. Turn the bridge **On**.
-5. Shortcut: `Ctrl+Shift+Y` (Windows/Linux) or `Cmd+Shift+Y` (macOS).
+5. Shortcut: `Ctrl+Shift+Y` (Windows/Linux) or `Cmd+Shift+Y` (macOS). The toolbar badge shows `ON` while the bridge is active.
 
 ## Localization
 
-The popup UI supports:
+The popup UI and the extension's store name/description (via `_locales`) support:
 
 - Turkish (`tr`)
 - English (`en`)
