@@ -1,4 +1,3 @@
-Harika bir fikir, Poyraz. Bu dokümanı GitHub reponun README.md dosyası olarak kullanabilir veya proje planın için bir roadmap olarak saklayabilirsin. Teknik mantığı ve kullanıcı deneyimini (UX) ön plana çıkaracak şekilde hazırladım.
 🎵 Audio Bridge: Seamless Tab Sync
 
 Audio Bridge, farklı tarayıcı sekmeleri arasındaki ses oynatma durumlarını birbirine bağlayan, odaklanma (Deep Work) süreçlerini optimize etmek için tasarlanmış açık kaynaklı bir tarayıcı eklentisidir.
