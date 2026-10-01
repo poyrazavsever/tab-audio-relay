@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/logoPng.png" alt="Audio Bridge Logo" width="150" />
+  <img src="assets/logo.png" alt="Audio Bridge Logo" width="150" />
 </div>
 
 # Audio Bridge
