@@ -18,10 +18,22 @@ async function loadState() {
     state.tabB = data.tabB || null;
     state.delayMs = data.delayMs !== undefined ? data.delayMs : 500;
     console.log("Audio Bridge State updated (Symmetric):", state);
+    updateBadge();
+}
+
+// Toolbar rozeti: köprü açıkken ikonda yeşil "ON" göster
+function updateBadge() {
+    chrome.action.setBadgeText({ text: state.bridgeActive ? 'ON' : '' });
+    chrome.action.setBadgeBackgroundColor({ color: '#10b981' });
+    chrome.action.setBadgeTextColor?.({ color: '#ffffff' });
 }
 
 // Initial load: olay dinleyicileri state yüklenmeden çalışmasın diye bu promise beklenir
 const stateReady = loadState();
+
+// Tarayıcı açılışında/kurulumda worker'ı uyandırıp rozeti geri yükle (rozet oturumlar arasında saklanmaz)
+chrome.runtime.onStartup.addListener(loadState);
+chrome.runtime.onInstalled.addListener(loadState);
 
 // Popup, kısayol veya sekme kapanması storage'ı değiştirdiğinde state'i tazele
 chrome.storage.onChanged.addListener((changes, area) => {
