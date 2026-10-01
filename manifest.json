@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Audio Bridge: Seamless Tab Sync",
+  "name": "__MSG_extName__",
   "version": "1.0.0",
-  "description": "Farklı tarayıcı sekmeleri arasındaki ses oynatma durumlarını birbirine bağlar.",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "tabs",
     "storage",
@@ -23,7 +24,7 @@
   },
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Audio Bridge",
+    "default_title": "__MSG_extActionTitle__",
     "default_icon": {
       "16": "assets/logo.png",
       "48": "assets/logo.png",
@@ -42,7 +43,7 @@
         "default": "Ctrl+Shift+Y",
         "mac": "Command+Shift+Y"
       },
-      "description": "Audio Bridge'i Aç/Kapat"
+      "description": "__MSG_commandToggleBridge__"
     }
   },
   "browser_specific_settings": {

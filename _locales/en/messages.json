@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "Audio Bridge: Seamless Tab Sync"
+  },
+  "extDescription": {
+    "message": "Links playback between two browser tabs: when one starts playing, the other pauses, and resumes when it stops."
+  },
+  "extActionTitle": {
+    "message": "Audio Bridge"
+  },
+  "commandToggleBridge": {
+    "message": "Toggle Audio Bridge on/off"
+  }
+}

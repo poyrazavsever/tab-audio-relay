@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "Audio Bridge: Seamless Tab Sync"
+  },
+  "extDescription": {
+    "message": "İki tarayıcı sekmesinin oynatmasını birbirine bağlar: biri çalmaya başlayınca diğeri duraklar, o durunca kaldığı yerden devam eder."
+  },
+  "extActionTitle": {
+    "message": "Audio Bridge"
+  },
+  "commandToggleBridge": {
+    "message": "Audio Bridge'i Aç/Kapat"
+  }
+}
