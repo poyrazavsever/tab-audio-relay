@@ -118,18 +118,44 @@ function resetTransition() {
     intendedPlayingTabId = null;
 }
 
-function controlMedia(tabId, action) {
-    chrome.tabs.sendMessage(tabId, { action: action }, (response) => {
-        if (chrome.runtime.lastError) {
-            console.log(`Injecting fallback script into tab ${tabId}...`);
-            chrome.scripting.executeScript({
+async function controlMedia(tabId, action) {
+    let response;
+    try {
+        response = await chrome.tabs.sendMessage(tabId, { action: action });
+        console.log(`Command ${action} sent successfully to tab ${tabId}.`);
+    } catch (err) {
+        console.log(`Injecting fallback script into tab ${tabId}...`);
+        try {
+            await chrome.scripting.executeScript({
                 target: { tabId: tabId },
                 files: ['content.js']
-            }).then(() => {
-                chrome.tabs.sendMessage(tabId, { action: action });
-            }).catch(err => console.error("Script injection failed:", err));
-        } else {
-            console.log(`Command ${action} sent successfully to tab ${tabId}.`);
+            });
+            response = await chrome.tabs.sendMessage(tabId, { action: action });
+        } catch (injectErr) {
+            console.error("Script injection failed:", injectErr);
+            return;
         }
-    });
+    }
+    if (response && response.acted) {
+        recordFocusSwitch();
+    }
+}
+
+// Odak sayacı: köprünün gerçekleştirdiği her geçişi gün bazında say.
+// Artırımlar sıraya alınır ki eşzamanlı iki geçiş birbirinin üzerine yazmasın.
+let statsQueue = Promise.resolve();
+
+function recordFocusSwitch() {
+    statsQueue = statsQueue.then(async () => {
+        const today = localDateKey();
+        const data = await chrome.storage.local.get(['statsDate', 'switchesToday']);
+        const count = data.statsDate === today ? (data.switchesToday || 0) + 1 : 1;
+        await chrome.storage.local.set({ statsDate: today, switchesToday: count });
+    }).catch(err => console.error("Focus stats update failed:", err));
+    return statsQueue;
+}
+
+function localDateKey(date = new Date()) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }

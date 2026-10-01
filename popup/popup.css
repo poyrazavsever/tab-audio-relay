@@ -54,6 +54,26 @@ p {
     transition: color 0.3s;
 }
 
+.stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: -8px;
+    padding: 0 16px;
+}
+
+.stats span {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.stats strong {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #10b981;
+    font-variant-numeric: tabular-nums;
+}
+
 .tab-selection, .settings {
     display: flex;
     flex-direction: column;

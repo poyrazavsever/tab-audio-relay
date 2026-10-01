@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tabALabel = document.getElementById("tabALabel");
   const tabBLabel = document.getElementById("tabBLabel");
   const delayLabel = document.getElementById("delayLabel");
+  const statsLabel = document.getElementById("statsLabel");
+  const statsCount = document.getElementById("statsCount");
 
   const translations = {
     en: {
@@ -19,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       tabALabel: "1st Tab (e.g. Video, Learning)",
       tabBLabel: "2nd Tab (e.g. Music, Spotify)",
       delayLabel: "Transition Delay (ms)",
+      statsLabel: "Focus switches today",
       selectPlaceholder: "Select...",
     },
     tr: {
@@ -29,6 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       tabALabel: "1. Sekme (Örn: Video, Eğitim)",
       tabBLabel: "2. Sekme (Örn: Müzik, Spotify)",
       delayLabel: "Geçiş Gecikmesi (ms)",
+      statsLabel: "Bugünkü odak geçişleri",
       selectPlaceholder: "Seçiniz...",
     },
   };
@@ -43,11 +47,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     "tabA",
     "tabB",
     "delayMs",
+    "statsDate",
+    "switchesToday",
   ]);
 
   bridgeToggle.checked = state.bridgeActive || false;
   updateStatusText(bridgeToggle.checked);
   delayInput.value = state.delayMs !== undefined ? state.delayMs : 500;
+  updateStats(state.statsDate, state.switchesToday);
 
   // Populate tabs
   const tabs = await chrome.tabs.query({ url: ["http://*/*", "https://*/*"] });
@@ -88,6 +95,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       bridgeToggle.checked = changes.bridgeActive.newValue || false;
       updateStatusText(bridgeToggle.checked);
     }
+    // Background sayacı her zaman bugünün tarihiyle yazar
+    if ("switchesToday" in changes) {
+      statsCount.textContent = String(changes.switchesToday.newValue || 0);
+    }
     if ("tabA" in changes && changes.tabA.newValue == null) {
       tabASelect.value = "";
       syncDisabledOptions();
@@ -117,6 +128,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       selectElement.appendChild(option);
     });
+  }
+
+  // Sayaç başka bir güne aitse bugün için 0 göster
+  function updateStats(statsDate, switchesToday) {
+    statsCount.textContent =
+      statsDate === localDateKey() ? String(switchesToday || 0) : "0";
+  }
+
+  function localDateKey(date = new Date()) {
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   // Aynı sekmenin iki tarafta birden seçilmesini engelle
@@ -150,5 +172,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     tabALabel.textContent = t.tabALabel;
     tabBLabel.textContent = t.tabBLabel;
     delayLabel.textContent = t.delayLabel;
+    statsLabel.textContent = t.statsLabel;
   }
 });
