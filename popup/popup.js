@@ -54,31 +54,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   populateSelect(tabASelect, tabs, state.tabA);
   populateSelect(tabBSelect, tabs, state.tabB);
+  syncDisabledOptions();
 
   // Event Listeners
   bridgeToggle.addEventListener("change", async (e) => {
     const isActive = e.target.checked;
     updateStatusText(isActive);
     await chrome.storage.local.set({ bridgeActive: isActive });
-    notifyBackground();
   });
 
   tabASelect.addEventListener("change", async (e) => {
     const value = e.target.value ? parseInt(e.target.value, 10) : null;
     await chrome.storage.local.set({ tabA: value });
-    notifyBackground();
+    syncDisabledOptions();
   });
 
   tabBSelect.addEventListener("change", async (e) => {
     const value = e.target.value ? parseInt(e.target.value, 10) : null;
     await chrome.storage.local.set({ tabB: value });
-    notifyBackground();
+    syncDisabledOptions();
   });
 
   delayInput.addEventListener("change", async (e) => {
-    const val = parseInt(e.target.value, 10) || 0;
+    const val = Math.min(Math.max(parseInt(e.target.value, 10) || 0, 0), 5000);
+    e.target.value = val;
     await chrome.storage.local.set({ delayMs: val });
-    notifyBackground();
+  });
+
+  // Kısayol veya sekme kapanması gibi popup dışı değişiklikleri yansıt
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local") return;
+    if ("bridgeActive" in changes) {
+      bridgeToggle.checked = changes.bridgeActive.newValue || false;
+      updateStatusText(bridgeToggle.checked);
+    }
+    if ("tabA" in changes && changes.tabA.newValue == null) {
+      tabASelect.value = "";
+      syncDisabledOptions();
+    }
+    if ("tabB" in changes && changes.tabB.newValue == null) {
+      tabBSelect.value = "";
+      syncDisabledOptions();
+    }
   });
 
   function updateStatusText(isActive) {
@@ -102,8 +119,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  function notifyBackground() {
-    chrome.runtime.sendMessage({ type: "SETTINGS_CHANGED" });
+  // Aynı sekmenin iki tarafta birden seçilmesini engelle
+  function syncDisabledOptions() {
+    [
+      [tabASelect, tabBSelect],
+      [tabBSelect, tabASelect],
+    ].forEach(([select, other]) => {
+      Array.from(select.options).forEach((option) => {
+        option.disabled = option.value !== "" && option.value === other.value;
+      });
+    });
   }
 
   function detectLocale() {

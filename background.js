@@ -20,12 +20,17 @@ async function loadState() {
     console.log("Audio Bridge State updated (Symmetric):", state);
 }
 
-// Initial load
-loadState();
+// Initial load: olay dinleyicileri state yüklenmeden çalışmasın diye bu promise beklenir
+const stateReady = loadState();
 
-// Popup'tan gelen bildirimleri dinle
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === 'SETTINGS_CHANGED') {
+// Popup, kısayol veya sekme kapanması storage'ı değiştirdiğinde state'i tazele
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') return;
+    if (['bridgeActive', 'tabA', 'tabB', 'delayMs'].some(key => key in changes)) {
+        // Köprü kapandıysa veya sekmeler değiştiyse bekleyen geçişi iptal et ve takibi sıfırla
+        if ('bridgeActive' in changes || 'tabA' in changes || 'tabB' in changes) {
+            resetTransition();
+        }
         loadState();
     }
 });
@@ -33,6 +38,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Kısayol (Shortcut) dinleyici
 chrome.commands.onCommand.addListener(async (command) => {
     if (command === 'toggle_bridge') {
+        await stateReady;
         state.bridgeActive = !state.bridgeActive;
         await chrome.storage.local.set({ bridgeActive: state.bridgeActive });
         console.log(`Bridge toggled via shortcut. Active: ${state.bridgeActive}`);
@@ -40,8 +46,10 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 // Sekme durum değişikliklerini dinle
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (!state.bridgeActive || !state.tabA || !state.tabB) return;
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (changeInfo.audible === undefined) return;
+    await stateReady;
+    if (!state.bridgeActive || !state.tabA || !state.tabB || state.tabA === state.tabB) return;
 
     if (changeInfo.audible !== undefined) {
         // Dinlenen iki sekmeden biri mi?
@@ -83,12 +91,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 // Sekme kapatılırsa temizlik yap
 chrome.tabs.onRemoved.addListener(async (tabId) => {
+    await stateReady;
     if (tabId === state.tabA || tabId === state.tabB) {
         if (tabId === state.tabA) await chrome.storage.local.set({ tabA: null, bridgeActive: false });
         if (tabId === state.tabB) await chrome.storage.local.set({ tabB: null, bridgeActive: false });
-        loadState();
     }
 });
+
+function resetTransition() {
+    if (playTimeout) {
+        clearTimeout(playTimeout);
+        playTimeout = null;
+    }
+    intendedPlayingTabId = null;
+}
 
 function controlMedia(tabId, action) {
     chrome.tabs.sendMessage(tabId, { action: action }, (response) => {
