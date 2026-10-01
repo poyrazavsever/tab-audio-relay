@@ -2,6 +2,14 @@
   <img src="assets/logo.png" alt="Audio Bridge Logo" width="150" />
 </div>
 
+<p align="center">
+  <a href="assets/promo/audio-bridge-promo.mp4">
+    <img src="assets/promo/poster.jpg" alt="Watch the 60-second Audio Bridge intro video" width="720" />
+  </a>
+  <br />
+  <sub>▶ <a href="assets/promo/audio-bridge-promo.mp4">Watch the 60-second intro</a></sub>
+</p>
+
 # Audio Bridge
 
 Audio Bridge is a lightweight browser extension that synchronizes playback behavior between two selected tabs to keep your focus flow uninterrupted.

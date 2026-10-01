@@ -2,6 +2,14 @@
   <img src="assets/logo.png" alt="Audio Bridge Logo" width="150" />
 </div>
 
+<p align="center">
+  <a href="assets/promo/audio-bridge-promo.mp4">
+    <img src="assets/promo/poster.jpg" alt="60 saniyelik Audio Bridge tanıtım videosunu izle" width="720" />
+  </a>
+  <br />
+  <sub>▶ <a href="assets/promo/audio-bridge-promo.mp4">60 saniyelik tanıtımı izle (İngilizce)</a></sub>
+</p>
+
 # Audio Bridge
 
 Audio Bridge, iki seçili sekme arasındaki oynatma davranışını senkronize ederek odak akışını korumaya yardımcı olan hafif bir tarayıcı eklentisidir.
