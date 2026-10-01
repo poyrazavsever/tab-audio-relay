@@ -2,13 +2,7 @@
   <img src="assets/logo.png" alt="Audio Bridge Logo" width="150" />
 </div>
 
-<p align="center">
-  <a href="assets/promo/audio-bridge-promo.mp4">
-    <img src="assets/promo/poster.jpg" alt="Watch the 60-second Audio Bridge intro video" width="720" />
-  </a>
-  <br />
-  <sub>▶ <a href="assets/promo/audio-bridge-promo.mp4">Watch the 60-second intro</a></sub>
-</p>
+https://github.com/user-attachments/assets/7b1014dc-61f7-4d28-90cf-3039b2bed7d8
 
 # Audio Bridge
 
